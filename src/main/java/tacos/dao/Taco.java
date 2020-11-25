@@ -1,9 +1,11 @@
 package tacos.dao;
 
+import java.util.Date;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import lombok.Data;
+
 
 @Data
 public class Taco {
@@ -13,6 +15,10 @@ public class Taco {
   private String name;
 
   @Size(min=1, message="You must choose at least 1 ingredient")
-  private List<String> ingredients;
+  private List<Ingredient> ingredients;
+
+  private Long id;
+
+  private Date createdAt;
 
 }
