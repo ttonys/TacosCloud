@@ -52,4 +52,41 @@
       }
   ```
 
+- 程序清单3.16声明JPA实体报错，直接全为公有有参和无参
+
+  ```
+  @Data
+  @AllArgsConstructor
+  @NoArgsConstructor
+  @Entity
+  public class Ingredient {
   
+      @Id
+      private String id;
+  
+      private String name;
+  
+      private Type type;
+  
+      public static enum Type {
+          WRAP, PROTEIN, VEGGIES, CHEESE, SAUCE
+      }
+  
+  }
+  ```
+
+- Hibernate默认将enum类型映射为number，枚举类型变量需要增加`@Enumerated`注解
+
+  ```
+      @Enumerated(EnumType.STRING)
+      private Type type;
+  ```
+
+- bug
+
+  ```
+  https://github.com/habuma/spring-in-action-5-samples/issues/54
+  ```
+
+  
+

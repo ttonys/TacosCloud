@@ -1,7 +1,8 @@
 spring:
   datasource:
     url: jdbc:h2:mem:testdb
-#    schema: schema.sql
+    initialization-mode: always
+  #    schema: schema.sql
 #    data: data.sql
 
   h2:
@@ -10,3 +11,7 @@ spring:
       settings:
         trace: true
       path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop

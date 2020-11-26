@@ -1,6 +1,7 @@
 package tacos.dao;
 
-public interface TacoRepository {
+import org.springframework.data.repository.CrudRepository;
 
-    Taco save(Taco design);
+public interface TacoRepository
+    extends CrudRepository<Taco, String> {
 }

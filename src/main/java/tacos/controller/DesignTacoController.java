@@ -1,7 +1,6 @@
 package tacos.controller;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,91 +8,99 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Repository;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
-import lombok.extern.slf4j.Slf4j;
-import tacos.dao.*;
+import tacos.dao.Ingredient;
 import tacos.dao.Ingredient.Type;
+import tacos.dao.Order;
+import tacos.dao.Taco;
+import tacos.dao.IngredientRepository;
+import tacos.dao.TacoRepository;
 
-@Slf4j
+//tag::injectingDesignRepository[]
+//tag::injectingIngredientRepository[]
 @Controller
 @RequestMapping("/design")
+//end::injectingIngredientRepository[]
 @SessionAttributes("order")
+//tag::injectingIngredientRepository[]
 public class DesignTacoController {
 
-
     private final IngredientRepository ingredientRepo;
-    private final TacoRepository designRepo;
+
+    //end::injectingIngredientRepository[]
+    private TacoRepository tacoRepo;
+
+    //end::injectingDesignRepository[]
+  /*
+  //tag::injectingIngredientRepository[]
+  public DesignTacoController(IngredientRepository ingredientRepo) {
+    this.ingredientRepo = ingredientRepo;
+  }
+  //end::injectingIngredientRepository[]
+   */
+    //tag::injectingDesignRepository[]
 
     @Autowired
-    public DesignTacoController(IngredientRepository ingredientRepo, TacoRepository designRepo){
+    public DesignTacoController(
+            IngredientRepository ingredientRepo,
+            TacoRepository tacoRepo) {
         this.ingredientRepo = ingredientRepo;
-        this.designRepo = designRepo;
+        this.tacoRepo = tacoRepo;
     }
 
-    @ModelAttribute
-    public void addIngredientsToModel(Model model) {
-        List<Ingredient> ingredients = Arrays.asList(
-                new Ingredient("FLTO", "Flour Tortilla", Type.WRAP),
-                new Ingredient("COTO", "Corn Tortilla", Type.WRAP),
-                new Ingredient("GRBF", "Ground Beef", Type.PROTEIN),
-                new Ingredient("CARN", "Carnitas", Type.PROTEIN),
-                new Ingredient("TMTO", "Diced Tomatoes", Type.VEGGIES),
-                new Ingredient("LETC", "Lettuce", Type.VEGGIES),
-                new Ingredient("CHED", "Cheddar", Type.CHEESE),
-                new Ingredient("JACK", "Monterrey Jack", Type.CHEESE),
-                new Ingredient("SLSA", "Salsa", Type.SAUCE),
-                new Ingredient("SRCR", "Sour Cream", Type.SAUCE)
-        );
+    @ModelAttribute(name = "order")
+    public Order order() {
+        return new Order();
+    }
+
+    @ModelAttribute(name = "design")
+    public Taco design() {
+        return new Taco();
+    }
+
+    //end::injectingDesignRepository[]
+
+    //tag::injectingIngredientRepository[]
+
+    @GetMapping
+    public String showDesignForm(Model model) {
+        List<Ingredient> ingredients = new ArrayList<>();
+        ingredientRepo.findAll().forEach(ingredients::add);
 
         Type[] types = Ingredient.Type.values();
         for (Type type : types) {
             model.addAttribute(type.toString().toLowerCase(),
                     filterByType(ingredients, type));
         }
-    }
-
-    @ModelAttribute(name="order")
-    public Order order(){
-        return new Order();
-    }
-
-    @ModelAttribute(name="taco")
-    public Taco taco(){
-        return new Taco();
-    }
-
-    @GetMapping
-    public String showDesignForm(Model model) {
-        List<Ingredient> ingredients = new ArrayList<>();
-        ingredientRepo.findAll().forEach(i -> ingredients.add(i));
-
-        Type[] types = Ingredient.Type.values();
-        for (Type type : types){
-            model.addAttribute(type.toString().toLowerCase(),
-                    filterByType(ingredients, type));
-        }
 //        model.addAttribute("design", new Taco());
         return "design";
     }
+    //end::injectingIngredientRepository[]
 
+    //tag::injectingDesignRepository[]
     @PostMapping
-    public String processDesign(@Valid Taco design,
-                                Errors errors, @ModelAttribute Order order) {
+    public String processDesign(
+            @Valid Taco taco, Errors errors,
+            @ModelAttribute Order order) {
+
         if (errors.hasErrors()) {
-            log.info("================");
-            log.info(design.toString());
             return "design";
         }
-        log.info("start save design");
-        Taco saved = designRepo.save(design);
+
+        Taco saved = tacoRepo.save(taco);
         order.addDesign(saved);
-        log.info("Processing design: " + design);
+
         return "redirect:/orders/current";
     }
+
+//end::injectingDesignRepository[]
 
     private List<Ingredient> filterByType(
             List<Ingredient> ingredients, Type type) {
@@ -103,4 +110,18 @@ public class DesignTacoController {
                 .collect(Collectors.toList());
     }
 
+  /*
+  //tag::injectingDesignRepository[]
+  //tag::injectingIngredientRepository[]
+
+   ...
+  //end::injectingIngredientRepository[]
+  //end::injectingDesignRepository[]
+  */
+
+//tag::injectingDesignRepository[]
+//tag::injectingIngredientRepository[]
+
 }
+//end::injectingIngredientRepository[]
+//end::injectingDesignRepository[]
